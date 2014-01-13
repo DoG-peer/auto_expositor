@@ -1,0 +1,360 @@
+#packopt name 'auto_expositor'
+title "自動解説機"
+;タブのボタンの設定
+buffer 1,240,20
+color 180,180,180
+boxf 0,0,80,20
+color 0,255,255
+boxf 80,0,160,20
+color 0,255,0
+boxf 160,0,240,20
+color 0,0,0
+
+;
+screen 0,320,360
+scene = ""
+*main
+//	dialog scene
+objsize 80,20
+objimage 1,0,0,80,0,160,0
+
+pos 0,0
+button "メイン",*Bメイン
+pos 80,0
+button "ライブラリ作成",*Bライブラリ作成
+pos 160,0
+button "ライブラリ要素",*Bライブラリ要素
+pos 240,0
+button "config",*Bコンフィグ
+;上のボタン配置
+
+
+;各シーンにあわせて描写
+gosub *Gシーン
+
+stop
+//////////////////////////////////////////////////
+
+*Bコンフィグ
+	if scene != "config"{
+		cls 0
+		scene = "config"
+		goto *main
+	}
+stop
+	
+*Bライブラリ作成
+	if scene != "library"{
+		cls 0
+		scene = "library"
+		goto *main
+	}
+stop
+
+
+*Bライブラリ要素
+	if scene != "contents"{
+		cls 0
+		scene = "contents"
+		goto *main
+	}
+stop
+
+*Bメイン
+	if scene != "main"{
+		cls 0
+		scene = "main"
+		goto *main
+	}
+stop
+//上のボタンを押したときの挙動
+//////////////////////////////////////////////////
+
+//////////////////////////////////////////////////
+//各シーンに合わせて変更
+*Gシーン
+	switch scene
+	case "main"
+		val = "ここに入力"
+		pos 0,20
+		mesbox val,240,270,,0
+		button "実行",*b実行_メイン
+	swbreak
+	
+	case "library"
+		gosub *Gライブラリウィンドウ
+	swbreak
+	
+	case "contents"
+		gosub *Gコンテンツウィンドウ
+	swbreak
+	case "config"
+		gosub *Gコンフィグ
+	swbreak
+	swend
+
+return
+
+//////////////////////////////////////////////////
+//メイン
+*B実行_メイン
+	//dialog val
+	
+	exist "a.txt" 
+	if strsize != -1: delete "a.txt"
+	notesel note
+	noteadd val
+	notesave "a.txt"
+	noteunsel
+	exec "main.rb",16
+	
+stop
+
+//////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////
+//ライブラリ
+
+*Gライブラリウィンドウ
+	//fokder name///////////////////////////////////////
+	folder = ""
+	pos 0,20
+	mes "フォルダ名を書いてください"
+	input folder,100
+	//////////////////////////////////////////////////
+	
+	//readme//////////////////////////////////////////
+	mes "readme"
+	readme = ""
+	mesbox readme,200,200
+	//////////////////////////////////////////////////
+	
+	//決定////////////////////////////////////////////
+	pos 200,270
+	button "決定" ,*B決定_ライブラリ
+	/////////////////////////////////////////////////
+	
+	
+	
+	//終了するか//////////////////////////////////////
+	pos 180,300
+	objsize 120
+	chkbox "フォルダを開く", view_flag
+	objsize 
+	//////////////////////////////////////////////////
+	
+	//終了するか//////////////////////////////////////
+	pos 180,330
+	objsize 120
+	chkbox "生成後終了しない", not_end_flag
+	objsize 
+	//////////////////////////////////////////////////
+
+return
+
+*B決定_ライブラリ
+	
+	///フォルダ///////////////////
+	dir_folder = "lib/" + folder
+	
+	sdim library_list,100
+	dirlist dir_list,"lib/*",5
+	split dir_list,"\n",library_list
+	
+	find_flag = 0
+	t = length(library_list)
+	repeat t
+		if folder == library_list(cnt) :find_flag = 1:break
+	loop
+	
+	if find_flag == 0{
+		mkdir dir_folder
+		goto *Gデフォ中身製作
+	}else{
+		dialog dir_folder + "は存在します．"
+	}
+stop
+
+*Gデフォ中身製作
+	////れどめ//////////////////////
+	if readme != "" {
+		notesel note
+		i = noteinfo(0)
+		//dialog i
+		repeat i
+			notedel 0
+		loop
+		noteadd readme
+		notesave dir_folder + "/readme.txt"
+		noteunsel
+	}
+	/////ref.bib//////////////////////////
+	ref = ""
+	notesel note
+		i = noteinfo(0)
+		repeat i
+			notedel 0
+		loop
+		noteadd ref
+		notesave dir_folder + "/ref.bib"
+		noteunsel
+	noteunsel
+	////フォルダを開く//////////////////////
+	if view_flag{
+		exec "lib\\"+folder,,"explore"
+	}
+	/////終了//////////////////////////////
+	if not_end_flag == 0 : end
+stop
+
+
+//////////////////////////////////////////////////
+//
+*Gコンテンツウィンドウ
+	pos 0,20
+	//library/////////////////////////////////////////
+	sdim library_list,100
+	dirlist dir_list,"lib/*",5
+	split dir_list,"\n",library_list
+	combox lib_id,,dir_list
+	//////////////////////////////////////////////////
+	
+	//file name///////////////////////////////////////
+	file = ""
+	mes "ファイル名を書いてください"
+	input file,100
+	//////////////////////////////////////////////////
+	
+	//tag/////////////////////////////////////////////
+	sdim tag_list,100
+	tag_input = ""
+	input tag_input
+	button "追加",*B追加_タグ
+	//tagの一覧
+	//tagのリセット
+	//////////////////////////////////////////////////
+	
+	//level//////////////////////////////////////////
+	level_list = "none","H1","H2","H3","B1","B2","B3","B4","M1","M2"
+	level_list_com = "none\nH1\nH2\nH3\nB1\nB2\nB3\nB4\nM1\nM2"
+	level = ""
+	pos 210,200 : mes "level"
+	pos 200,225 : combox level_id,,level_list_com
+	
+	/////////////////////////////////////////////////
+	
+	//決定////////////////////////////////////////////
+	pos 200,300
+	button "決定" ,*B決定_コンテンツ
+	/////////////////////////////////////////////////
+return
+
+*B追加_タグ
+	tag_size = length(tag_list)
+	flag_add = 1
+	repeat tag_size
+		if tag_list(cnt) == tag_input : flag_add = 0 : break
+	loop
+	if flag_add == 1{
+		tag_list(tag_size) = tag_input
+	}
+stop
+
+*B決定_コンテンツ
+	notesel note
+	
+	//////////////////////
+	tag_val = "%tag :"
+	tag_size = length(tag_list)
+	repeat tag_size
+		//tag_list(0) = ""なのでその対策
+		if tag_list(cnt) != "" : tag_val += " " + tag_list(cnt)
+	loop
+	noteadd tag_val,0,1
+	//////////////////////////
+	level_val = ""
+	level = level_list(level_id)
+	level_val = "%level : " + level
+	noteadd level_val,1,1
+	///////////////////////////////
+	lib_name = library_list(lib_id)
+	dir = "lib/" + lib_name + "/" + file + ".tex"
+	pos 30,100 :mes dir
+	
+	exist dir
+	if strsize = -1{
+		notesave dir
+	}else{
+		dialog dir + "は存在します．"
+	}
+	noteunsel
+	
+	exec "notepad " + dir
+stop
+
+/////////////////////////////////////////////////
+*Gコンフィグ
+pos 0,20
+	//library////////////////////////////////////////
+	sdim library_list,100
+	dirlist dir_list,"lib/*",5
+	split dir_list,"\n",library_list
+	
+	mes "追加するライブラリを選択"
+	l = length(library_list)
+	dim check,l
+	repeat l-1
+	//pos 0,30 * (cnt +1 )
+		chkbox library_list(cnt),check(cnt)
+	loop
+	chkbox "all",check(l-1)
+	/////////////////////////////////////////////////
+	
+	//level//////////////////////////////////////////
+	level_list = "none","H1","H2","H3","B1","B2","B3","B4","M1","M2"
+	level_list_com = "none\nH1\nH2\nH3\nB1\nB2\nB3\nB4\nM1\nM2"
+	min_level = ""
+	max_level = ""
+	
+	pos 210,200 : mes "level"
+	pos 170,225 : mes "min"
+	pos 170,250 : mes "max"
+	pos 200,225 : combox min_level_id,,level_list_com
+	pos 200,250 : combox max_level_id,,level_list_com
+	
+	/////////////////////////////////////////////////
+	
+	
+	//決定///////////////////////////////////////////
+	pos 200,300
+	button "決定" ,*B決定_コンフィグ
+	
+	
+	/////////////////////////////////////////////////
+return
+
+
+*B決定_コンフィグ
+	notesel note
+	val = ""
+	if check(l-1) == 1{
+		
+		noteadd "library all",0,1
+	}else{
+		val = "library"
+		repeat l-1
+			if check(cnt) == 1{
+				val += " " + library_list(cnt)
+			}
+		loop
+		noteadd val,0,1
+	}
+	min_level = level_list(min_level_id)
+	max_level = level_list(max_level_id)
+	val = "level " + min_level + " " + max_level
+	noteadd val,1,1
+	notesave "config.ini"
+	noteunsel
+stop
+
