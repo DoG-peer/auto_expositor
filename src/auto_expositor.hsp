@@ -1,13 +1,13 @@
 #packopt name 'auto_expositor'
 title "自動解説機"
 ;タブのボタンの設定
-buffer 1,240,20
+buffer 1,240,40
 color 180,180,180
-boxf 0,0,80,20
+boxf 0,0,80,40
 color 0,255,255
-boxf 80,0,160,20
+boxf 80,0,160,40
 color 0,255,0
-boxf 160,0,240,20
+boxf 160,0,240,40
 color 0,0,0
 
 ;
@@ -27,6 +27,7 @@ button "ライブラリ要素",*Bライブラリ要素
 pos 240,0
 button "config",*Bコンフィグ
 ;上のボタン配置
+objsize
 
 
 ;各シーンにあわせて描写
@@ -103,6 +104,9 @@ return
 	exist "a.txt" 
 	if strsize != -1: delete "a.txt"
 	notesel note
+	repeat noteinfo(0)
+		notedel 0
+	loop
 	noteadd val
 	notesave "a.txt"
 	noteunsel
@@ -224,30 +228,45 @@ stop
 	file = ""
 	mes "ファイル名を書いてください"
 	input file,100
-	//////////////////////////////////////////////////
+	//////////////////////////////////////////////
 	
-	//tag/////////////////////////////////////////////
+	//tag/////////////////////////////////////////
 	sdim tag_list,100
 	tag_input = ""
 	input tag_input
 	button "追加",*B追加_タグ
 	//tagの一覧
 	//tagのリセット
-	//////////////////////////////////////////////////
+	//////////////////////////////////////////////
 	
-	//level//////////////////////////////////////////
+	//level///////////////////////////////////////
 	level_list = "none","H1","H2","H3","B1","B2","B3","B4","M1","M2"
 	level_list_com = "none\nH1\nH2\nH3\nB1\nB2\nB3\nB4\nM1\nM2"
 	level = ""
-	pos 210,200 : mes "level"
-	pos 200,225 : combox level_id,,level_list_com
+	pos 230,50 : mes "level"
+	pos 220,75 : combox level_id,,level_list_com
 	
-	/////////////////////////////////////////////////
+	//////////////////////////////////////////////
 	
-	//決定////////////////////////////////////////////
-	pos 200,300
+	//決定////////////////////////////////////////
+	pos 220,100
 	button "決定" ,*B決定_コンテンツ
-	/////////////////////////////////////////////////
+	//////////////////////////////////////////////
+	line 0,140,360,140
+	line 0,142,360,142
+	//開く////////////////////////////////////////
+	/*pos 0,150
+	open_lib_id = 1
+	mes "ファイルを開く"
+	combox open_lib_id,,dir_list
+	
+	dir_contents_list = ""
+	sdim contents_list,100
+	dirlist contents_list,"lib/" + library_list(open_lib_id) + "/*",5
+	split dir_contents_list,"\n",contents_list
+	combox open_contents_id,,dir_contents_list
+	*/
+	///////////////////////////////////////////////
 return
 
 *B追加_タグ
@@ -280,7 +299,7 @@ stop
 	///////////////////////////////
 	lib_name = library_list(lib_id)
 	dir = "lib/" + lib_name + "/" + file + ".tex"
-	pos 30,100 :mes dir
+	//pos 30,100 :mes dir
 	
 	exist dir
 	if strsize = -1{
@@ -290,7 +309,7 @@ stop
 	}
 	noteunsel
 	
-	exec "notepad " + dir
+	exec "lib\\" + lib_name + "\\" + file + ".tex",16
 stop
 
 /////////////////////////////////////////////////
@@ -304,12 +323,20 @@ pos 0,20
 	mes "追加するライブラリを選択"
 	l = length(library_list)
 	dim check,l
+	
+	objsize 128
 	repeat l-1
 	//pos 0,30 * (cnt +1 )
 		chkbox library_list(cnt),check(cnt)
 	loop
 	chkbox "all",check(l-1)
+	objsize
 	/////////////////////////////////////////////////
+	
+	//editor/////////////////////////////////////////
+	//現在デフォルト
+	/////////////////////////////////////////////////
+	
 	
 	//level//////////////////////////////////////////
 	level_list = "none","H1","H2","H3","B1","B2","B3","B4","M1","M2"

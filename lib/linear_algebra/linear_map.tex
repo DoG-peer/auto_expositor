@@ -1,0 +1,34 @@
+%tags : 線型写像 linear_map 線形写像
+%level : 
+%package : 
+%
+
+\begin{dfn}[線型写像]
+	$V,W$を$K$上のベクトル空間とする．写像$f: V\to W$が線型写像とは，これが次の条件を満たすときをいう．
+	\begin{enumerate}
+		\item $u,v \in V$に対し，$f(u+v) =f(u)+f(v) $
+			\item $a\in K$, $v\in V$に対し，$f(av) = af(v)$
+	\end{enumerate}
+\end{dfn}
+
+例
+
+\[V = \left\{ (x,y) \ \right| x,y\in\mathbb{Q}\left. \right\}\]
+\[W = \left\{ (x,y,z) \ \right| x,y,z\in\mathbb{Q}\left. \right\}$\]
+とおき，$f(x,y) = (2x+4y,-x,2y)$によって写像$f:V\to W$を定義する．
+このとき，たしかに$f$は$\mathbb{Q}$上の線型写像になっている．
+
+しかし，$g(x,y) = (1,x,y)$は線型写像ではない．
+$f$が線型写像なら，$f(0)=0$であるからだ．
+
+$f:U\to V$, $g:V\to W$が線型写像だとする．
+$f$と$g$の合成$g\circ f:U\to W$, $g\circ f(u)=g(f(u))$も線形写像．
+行列の掛け算はこれが由来．
+
+
+
+
+
+
+
+
